@@ -1,0 +1,125 @@
+<div class="container py-5">
+  <button class="btn btn-link px-0 mb-3" type="button" routerLink="/levantamentos">← Voltar para meus levantamentos</button>
+
+  <div *ngIf="levantamento" class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h2>{{ levantamento.nome }}</h2>
+          <p class="text-muted mb-0">{{ levantamento.bioma }} • {{ levantamento.cidade }}, {{ levantamento.estado }} - {{ levantamento.pais }}</p>
+        </div>
+        <!-- Adiciona o botão chamando o Modal -->
+        <button class="btn btn-success" (click)="openCreateModal(formModal)">
+          <i class="fas fa-plus"></i> Adicionar indivíduo
+        </button>
+      </div>
+      <p class="mt-3 mb-0" *ngIf="levantamento.descricao">{{ levantamento.descricao }}</p>
+    </div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading" message="Carregando indivíduos..."></app-loading-spinner>
+
+  <div *ngIf="!loading && levantamento">
+    <div class="table-responsive bg-white rounded shadow-sm p-3">
+      <table class="table mb-0 align-middle">
+        <thead class="table-light">
+        <tr>
+          <th>Parcela</th>
+          <th>Nome popular</th>
+          <th>Nome científico</th>
+          <th>Status</th>
+          <th class="text-end">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let individuo of individuos">
+          <td>{{ individuo.parcela }}</td>
+          <td>{{ individuo.nomePopular || '-' }}</td>
+          <td>{{ individuo.nomeCientifico || '-' }}</td>
+          <td>
+              <span class="badge" [ngClass]="{'bg-success': individuo.vivoMorto === 'vivo', 'bg-secondary': individuo.vivoMorto === 'morto'}">
+                {{ individuo.vivoMorto | titlecase }}
+              </span>
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="viewIndividuo(individuo.id)" title="Ver IA e Galeria">
+              Detalhes
+            </button>
+            <button class="btn btn-sm btn-outline-secondary me-2" (click)="openEditModal(individuo, formModal)" title="Editar dados">
+              <i class="fa fa-pen"></i> Editar
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(individuo.id)" title="Excluir indivíduo">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="individuos.length === 0">
+          <td colspan="5" class="text-center text-muted py-4">Nenhum indivíduo vinculado a este levantamento.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="page" [totalPages]="totalPages" (pageChange)="loadIndividuos($event)"></app-pagination>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL DE FORMULÁRIO (CRIAR E EDITAR INDIVÍDUO) -->
+<!-- ============================================== -->
+<ng-template #formModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ isEditing ? 'Editar Indivíduo' : 'Adicionar Indivíduo' }}</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="individuoForm">
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <label class="form-label">Parcela <span class="text-danger">*</span></label>
+          <input class="form-control" formControlName="parcela" placeholder="Ex: P-01" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nome Popular</label>
+          <input class="form-control" formControlName="nomePopular" placeholder="Ex: Ipê-amarelo" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nome Científico</label>
+          <input class="form-control" formControlName="nomeCientifico" placeholder="Ex: Handroanthus albus" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Diâmetro (cm)</label>
+          <input type="number" class="form-control" formControlName="diametroCaule" placeholder="Ex: 30" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Status <span class="text-danger">*</span></label>
+          <select class="form-select" formControlName="vivoMorto">
+            <option value="vivo">Vivo</option>
+            <option value="morto">Morto</option>
+          </select>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Data do Levantamento <span class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" formControlName="dataLevantamento" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <!-- Removemos o "|| individuoForm.invalid" do disabled -->
+    <button type="button" class="btn btn-success" [disabled]="saving" (click)="saveIndividuo(modal)">
+      {{ saving ? 'Salvando...' : 'Salvar Indivíduo' }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- ========================= -->
+<!-- MODAL CONFIRMAÇÃO EXCLUIR -->
+<!-- ========================= -->
+<app-confirm-modal
+  title="Excluir Indivíduo"
+  message="Tem certeza que deseja remover este indivíduo? Esta ação não pode ser desfeita."
+  [show]="showDeleteModal"
+  (confirmed)="executeDelete()"
+  (cancelled)="cancelDelete()">
+</app-confirm-modal>

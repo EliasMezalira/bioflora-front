@@ -1,0 +1,39 @@
+<div class="container py-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2>Editar Levantamento</h2>
+      <app-loading-spinner *ngIf="loading" message="Carregando dados..."></app-loading-spinner>
+      <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row gy-3">
+          <div class="col-md-6">
+            <label class="form-label">Nome</label>
+            <input class="form-control" formControlName="nome" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Bioma</label>
+            <input class="form-control" formControlName="bioma" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Cidade</label>
+            <input class="form-control" formControlName="cidade" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Estado</label>
+            <input class="form-control" formControlName="estado" maxlength="2" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">País</label>
+            <input class="form-control" formControlName="pais" />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-control" rows="4" formControlName="descricao"></textarea>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button class="btn btn-success" type="submit" [disabled]="loading || form.invalid">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

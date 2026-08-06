@@ -1,0 +1,9 @@
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h4>Upload de imagem</h4>
+    <div class="mb-3">
+      <input class="form-control" type="file" (change)="onFileChange($event)" accept="image/*" />
+    </div>
+    <button class="btn btn-primary" [disabled]="!file || uploading" (click)="upload()">{{ uploading ? 'Enviando...' : 'Enviar imagem' }}</button>
+  </div>
+</div>

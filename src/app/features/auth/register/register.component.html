@@ -1,0 +1,33 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="card-title mb-4">Registrar</h2>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label class="form-label">Nome</label>
+              <input formControlName="nome" class="form-control" placeholder="Seu nome"> 
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input formControlName="email" type="email" class="form-control" placeholder="seu@email.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Senha</label>
+              <input formControlName="senha" type="password" class="form-control" placeholder="********">
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirmar senha</label>
+              <input formControlName="confirmSenha" type="password" class="form-control" placeholder="********">
+            </div>
+            <button class="btn btn-success w-100" type="submit" [disabled]="loading || form.invalid">
+              {{ loading ? 'Registrando...' : 'Registrar' }}
+            </button>
+          </form>
+          <p class="mt-3 mb-0">Já tem conta? <a routerLink="/auth/login">Entrar</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

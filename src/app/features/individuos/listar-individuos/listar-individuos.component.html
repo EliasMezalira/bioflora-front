@@ -1,0 +1,35 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Indivíduos</h2>
+    <button class="btn btn-success" (click)="create()">Novo indivíduo</button>
+  </div>
+  <app-loading-spinner *ngIf="loading" message="Buscando indivíduos..."></app-loading-spinner>
+  <div *ngIf="!loading">
+    <div class="table-responsive bg-white rounded shadow-sm p-3">
+      <table class="table mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Parcela</th>
+            <th>Nome Popular</th>
+            <th>Vivo/Morto</th>
+            <th>Data</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let individuo of individuos">
+            <td>{{ individuo.parcela }}</td>
+            <td>{{ individuo.nomePopular || '-' }}</td>
+            <td>{{ individuo.vivoMorto }}</td>
+            <td>{{ individuo.dataLevantamento | dateFormat }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="detail(individuo.id)">Detalhes</button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="edit(individuo.id)">Editar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="page" [totalPages]="totalPages" (pageChange)="loadPage($event)"></app-pagination>
+  </div>
+</div>

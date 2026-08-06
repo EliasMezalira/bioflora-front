@@ -1,0 +1,13 @@
+<nav *ngIf="totalPages > 1" aria-label="Paginacao">
+  <ul class="pagination justify-content-center mb-0">
+    <li class="page-item" [class.disabled]="page === 0">
+      <button class="page-link" type="button" (click)="goTo(page - 1)">Anterior</button>
+    </li>
+    <li class="page-item" [class.active]="page === i" *ngFor="let i of [].constructor(totalPages); let idx = index">
+      <button class="page-link" type="button" (click)="goTo(idx)">{{ idx + 1 }}</button>
+    </li>
+    <li class="page-item" [class.disabled]="page === totalPages - 1">
+      <button class="page-link" type="button" (click)="goTo(page + 1)">Próximo</button>
+    </li>
+  </ul>
+</nav>

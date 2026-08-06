@@ -1,0 +1,41 @@
+<div class="container py-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2>Adicionar Indivíduo</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row gy-3">
+          <div class="col-md-6">
+            <label class="form-label">Parcela</label>
+            <input class="form-control" formControlName="parcela" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nome Popular</label>
+            <input class="form-control" formControlName="nomePopular" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nome Científico</label>
+            <input class="form-control" formControlName="nomeCientifico" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Diâmetro do Caule</label>
+            <input type="number" class="form-control" formControlName="diametroCaule" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Vivo / Morto</label>
+            <select class="form-select" formControlName="vivoMorto">
+              <option value="vivo">Vivo</option>
+              <option value="morto">Morto</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Data do Levantamento</label>
+            <input type="datetime-local" class="form-control" formControlName="dataLevantamento" />
+          </div>
+        </div>
+        <div class="mt-4">
+          <button class="btn btn-success" type="submit" [disabled]="loading || form.invalid">{{ loading ? 'Salvando...' : 'Salvar indivíduo' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

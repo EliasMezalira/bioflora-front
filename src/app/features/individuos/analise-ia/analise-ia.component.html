@@ -1,0 +1,33 @@
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h4>Análise IA</h4>
+    <button class="btn btn-info mb-3" [disabled]="loading" (click)="analyze()">{{ loading ? 'Analisando...' : 'Analisar com IA' }}</button>
+    <div *ngIf="error" class="alert alert-danger">Não foi possível buscar o resultado da IA.</div>
+    <div *ngIf="result" class="row gy-3">
+      <div class="col-md-4">
+        <div class="card p-3 border-success">
+          <h5>Taxonomia</h5>
+          <p><strong>Reino:</strong> {{ result.taxon.reino }}</p>
+          <p><strong>Gênero:</strong> {{ result.taxon.genero }}</p>
+          <p><strong>Espécie:</strong> {{ result.taxon.especie }}</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3 border-info">
+          <h5>Geografia</h5>
+          <p><strong>Município:</strong> {{ result.geografia.municipio }}</p>
+          <p><strong>UF:</strong> {{ result.geografia.uf }}</p>
+          <p><strong>Bioma:</strong> {{ result.geografia.bioma }}</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3 border-warning">
+          <h5>Ecologia</h5>
+          <p><strong>Status:</strong> {{ result.ecologia.statusConservacao }}</p>
+          <p><strong>Origem:</strong> {{ result.ecologia.origem }}</p>
+          <p><strong>Importância:</strong> {{ result.ecologia.importanciaEcologica }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

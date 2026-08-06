@@ -1,0 +1,45 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Meus levantamentos</h2>
+      <small class="text-muted">Selecione um levantamento para consultar seus dados e indivíduos.</small>
+    </div>
+    <button class="btn btn-success" (click)="router.navigate(['/levantamentos/criar'])">Novo levantamento</button>
+  </div>
+
+  <app-loading-spinner *ngIf="loading" message="Carregando levantamentos..."></app-loading-spinner>
+
+  <div *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table table-hover bg-white shadow-sm rounded overflow-hidden">
+        <thead class="table-light">
+          <tr>
+            <th>Nome</th>
+            <th>Bioma</th>
+            <th>Cidade</th>
+            <th>Estado</th>
+            <th>País</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let levantamento of levantamentos">
+            <td>{{ levantamento.nome }}</td>
+            <td>{{ levantamento.bioma }}</td>
+            <td>{{ levantamento.cidade }}</td>
+            <td>{{ levantamento.estado }}</td>
+            <td>{{ levantamento.pais }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="detail(levantamento.id)">Detalhes</button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="edit(levantamento.id)">Editar</button>
+            </td>
+          </tr>
+          <tr *ngIf="levantamentos.length === 0">
+            <td colspan="6" class="text-center text-muted py-4">Você ainda não possui levantamentos cadastrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="page" [totalPages]="totalPages" (pageChange)="loadPage($event)"></app-pagination>
+  </div>
+</div>
