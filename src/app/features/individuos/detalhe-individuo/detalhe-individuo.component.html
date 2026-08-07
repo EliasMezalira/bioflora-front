@@ -32,7 +32,10 @@
       </div>
     </div>
   </div>
-  <app-upload-imagem [individuoId]="individuo.id"></app-upload-imagem>
-  <app-galeria-imagens [individuoId]="individuo.id"></app-galeria-imagens>
+  <app-upload-imagem
+    [individuoId]="individuo.id"
+    (uploaded)="galeria.loadImages()">
+  </app-upload-imagem>
+  <app-galeria-imagens #galeria [individuoId]="individuo.id"></app-galeria-imagens>
   <app-analise-ia [individuoId]="individuo.id"></app-analise-ia>
 </div>
