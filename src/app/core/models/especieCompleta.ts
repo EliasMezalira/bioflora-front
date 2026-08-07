@@ -1,5 +1,5 @@
 export interface EspecieCompleta {
-  statusValidacao: string;
+  status_validacao: string;
   taxon: {
     reino: string;
     divisao: string;
@@ -7,7 +7,7 @@ export interface EspecieCompleta {
     genero: string;
     especie: string;
     autor: string;
-    nomeComumConfirmado: string;
+    nome_comum_confirmado: string;
   };
   geografia: {
     municipio: string;
@@ -15,8 +15,8 @@ export interface EspecieCompleta {
     bioma: string;
   };
   ecologia: {
-    statusConservacao: string;
+    status_conservacao: string;
     origem: string;
-    importanciaEcologica: string;
+    importancia_ecologica: string;
   };
 }
