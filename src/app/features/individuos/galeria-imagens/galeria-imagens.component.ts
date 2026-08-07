@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ImagemResponse } from '../../../core/models/imagem';
 import { ImagemService } from '../../../core/services/imagem.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-galeria-imagens',
@@ -38,5 +39,9 @@ export class GaleriaImagensComponent implements OnChanges {
       next: () => this.loadImages(),
       error: () => {}
     });
+  }
+
+  getImgURL(imagem: ImagemResponse): string {
+    return environment.apiUrl + `/imagens/${imagem.id}`;
   }
 }

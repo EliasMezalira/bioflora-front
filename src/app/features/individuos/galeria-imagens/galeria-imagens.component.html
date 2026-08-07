@@ -1,17 +1,23 @@
 <div class="card shadow-sm mb-4">
   <div class="card-body">
     <h4>Galeria de imagens</h4>
-    <div *ngIf="loading" class="text-center py-3">Carregando imagens...</div>
-    <div class="row g-3" *ngIf="!loading">
-      <div class="col-sm-6 col-lg-4" *ngFor="let imagem of imagens">
-        <div class="card">
-          <img [src]="'/api/imagens/' + imagem.id" class="card-img-top" alt="{{ imagem.nome }}">
-          <div class="card-body py-2">
-            <p class="mb-2 small text-muted">{{ imagem.nome }}</p>
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteImage(imagem.id)">Excluir</button>
+    @if (loading) {
+      <div class="text-center py-3">Carregando imagens...</div>
+    } 
+    @else {
+      <div class="row g-3">
+        @for (imagem of imagens; track imagem.id) {
+          <div class="col-sm-6 col-lg-4">
+            <div class="card">
+              <img [src]="getImgURL(imagem)" class="card-img-top" alt="{{ imagem.nome }}">
+              <div class="card-body py-2">
+                <p class="mb-2 small text-muted">{{ imagem.nome }}</p>
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteImage(imagem.id)">Excluir</button>
+              </div>
+            </div>
           </div>
-        </div>
+        }
       </div>
-    </div>
+    }
   </div>
 </div>
