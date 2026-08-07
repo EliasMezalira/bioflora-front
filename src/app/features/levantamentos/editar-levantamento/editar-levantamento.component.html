@@ -31,6 +31,7 @@
           </div>
         </div>
         <div class="mt-4">
+          <button class="btn btn-outline-secondary me-2" type="button" (click)="cancelar()">Cancelar</button>
           <button class="btn btn-success" type="submit" [disabled]="loading || form.invalid">Salvar alterações</button>
         </div>
       </form>

@@ -6,6 +6,9 @@
           <h2>Indivíduo {{ individuo.parcela }}</h2>
           <p class="text-muted">{{ individuo.nomePopular || 'Sem nome popular' }}</p>
         </div>
+        <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/levantamentos', individuo.levantamentoId]">
+          Voltar para o levantamento
+        </a>
       </div>
       <div class="row gy-3">
         <div class="col-md-4">

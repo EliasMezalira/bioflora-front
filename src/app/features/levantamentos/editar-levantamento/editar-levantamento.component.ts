@@ -63,4 +63,8 @@ export class EditarLevantamentoComponent implements OnInit {
       }
     });
   }
+
+  cancelar(): void {
+    this.router.navigate(['/levantamentos']);
+  }
 }
