@@ -1,0 +1,54 @@
+name: CD - Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI - Test"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    steps:
+      - name: Clonar código
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Gerar build
+        run: npm run build -- --base-href /bioflora-front/
+
+      - name: Preparar artefato
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './dist/bioflora-front/browser'
+
+      - name: Deploy
+        uses: actions/deploy-pages@v4
