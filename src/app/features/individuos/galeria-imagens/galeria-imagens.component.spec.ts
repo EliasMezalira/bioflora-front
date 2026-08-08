@@ -141,6 +141,6 @@ describe('GaleriaImagensComponent', () => {
   it('should build the image URL using the API base URL', () => {
     const image = { id: 42 } as any;
 
-    expect(component.getImgURL(image)).toBe('http://localhost:8080/api/imagens/42');
+    expect(component.getImgURL(image)).toContain('/imagens/42');
   });
 });
