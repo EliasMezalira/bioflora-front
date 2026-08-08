@@ -1,17 +1,21 @@
-<div class="modal-backdrop" *ngIf="show">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">{{ title }}</h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
-      </div>
-      <div class="modal-body">
-        <p>{{ message }}</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirm()">Confirmar</button>
+<ng-container *ngIf="show">
+  <div class="modal-backdrop fade show" (click)="close()"></div>
+
+  <div class="modal show d-block" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ title }}</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+        </div>
+        <div class="modal-body">
+          <p>{{ message }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="close()">Cancelar</button>
+          <button type="button" class="btn btn-danger" (click)="confirm()">Confirmar</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
