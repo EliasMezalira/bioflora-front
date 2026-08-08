@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 
 import { NavbarComponent } from './navbar.component';
@@ -64,8 +64,11 @@ const modalStub = {
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
+  let router: Router;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [],
       providers: [
@@ -83,10 +86,21 @@ describe('NavbarComponent', () => {
     
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
+        router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+      it('should logout and navigate to login', () => {
+        const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+        const logoutSpy = authServiceStub.logout as jest.Mock;
+
+        component.logout();
+
+        expect(logoutSpy).toHaveBeenCalled();
+        expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
+      });
 });

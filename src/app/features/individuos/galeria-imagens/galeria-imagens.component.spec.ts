@@ -1,6 +1,7 @@
+import { SimpleChange } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { GaleriaImagensComponent } from './galeria-imagens.component';
@@ -85,9 +86,61 @@ describe('GaleriaImagensComponent', () => {
     fixture = TestBed.createComponent(GaleriaImagensComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    jest.clearAllMocks();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load images when individuoId changes to a valid value', () => {
+    const images = [{ id: 1 } as any];
+    const listarSpy = jest.spyOn(TestBed.inject(ImagemService), 'listarPorIndividuo').mockReturnValue(of(images));
+
+    component.individuoId = 7;
+    component.ngOnChanges({ individuoId: new SimpleChange(undefined, 7, true) });
+
+    expect(listarSpy).toHaveBeenCalledWith(7);
+    expect(component.imagens).toEqual(images);
+    expect(component.loading).toBe(false);
+  });
+
+  it('should not load images when individuoId is falsy', () => {
+    const listarSpy = jest.spyOn(TestBed.inject(ImagemService), 'listarPorIndividuo');
+
+    component.individuoId = 0;
+    component.ngOnChanges({ individuoId: new SimpleChange(undefined, 0, true) });
+
+    expect(listarSpy).not.toHaveBeenCalled();
+  });
+
+  it('should set loading false when image loading fails', () => {
+    jest.spyOn(TestBed.inject(ImagemService), 'listarPorIndividuo').mockReturnValue(throwError(() => new Error('fail')));
+
+    component.individuoId = 3;
+    component.loadImages();
+
+    expect(component.loading).toBe(false);
+  });
+
+  it('should delete an image and reload the gallery on success', () => {
+    const loadImagesSpy = jest.spyOn(component, 'loadImages');
+    jest.spyOn(TestBed.inject(ImagemService), 'deletar').mockReturnValue(of(void 0));
+
+    component.deleteImage(10);
+
+    expect(loadImagesSpy).toHaveBeenCalled();
+  });
+
+  it('should ignore delete errors', () => {
+    jest.spyOn(TestBed.inject(ImagemService), 'deletar').mockReturnValue(throwError(() => new Error('fail')));
+
+    expect(() => component.deleteImage(10)).not.toThrow();
+  });
+
+  it('should build the image URL using the API base URL', () => {
+    const image = { id: 42 } as any;
+
+    expect(component.getImgURL(image)).toBe('http://localhost:8080/api/imagens/42');
   });
 });

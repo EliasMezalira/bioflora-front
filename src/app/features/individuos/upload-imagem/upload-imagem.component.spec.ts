@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { UploadImagemComponent } from './upload-imagem.component';
@@ -65,6 +65,8 @@ const modalStub = {
 describe('UploadImagemComponent', () => {
   let component: UploadImagemComponent;
   let fixture: ComponentFixture<UploadImagemComponent>;
+  let imagemService: any;
+  let toastrService: any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -84,10 +86,132 @@ describe('UploadImagemComponent', () => {
     
     fixture = TestBed.createComponent(UploadImagemComponent);
     component = fixture.componentInstance;
+    imagemService = TestBed.inject(ImagemService);
+    toastrService = TestBed.inject(ToastrService);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize with default values', () => {
+    expect(component.individuoId).toBe(0);
+    expect(component.file).toBeUndefined();
+    expect(component.uploading).toBe(false);
+  });
+
+  describe('onFileChange', () => {
+    it('should set file when user selects a file', () => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      const mockEvent = {
+        target: {
+          files: [mockFile]
+        }
+      } as any;
+
+      component.onFileChange(mockEvent);
+
+      expect(component.file).toBe(mockFile);
+    });
+
+    it('should not set file when no file is selected', () => {
+      const mockEvent = {
+        target: {
+          files: []
+        }
+      } as any;
+
+      component.onFileChange(mockEvent);
+
+      expect(component.file).toBeUndefined();
+    });
+
+    it('should not set file when files are null', () => {
+      const mockEvent = {
+        target: {
+          files: null
+        }
+      } as any;
+
+      component.onFileChange(mockEvent);
+
+      expect(component.file).toBeUndefined();
+    });
+  });
+
+  describe('upload', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should upload file successfully', () => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      component.file = mockFile;
+      component.individuoId = 1;
+
+      component.upload();
+
+      expect(imagemService.upload).toHaveBeenCalledWith(1, mockFile);
+      expect(component.uploading).toBe(false);
+      expect(toastrService.success).toHaveBeenCalledWith('Imagem enviada');
+    });
+
+    it('should emit uploaded event after successful upload', (done) => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      component.file = mockFile;
+      component.individuoId = 1;
+
+      component.uploaded.subscribe(() => {
+        expect(true).toBe(true);
+        done();
+      });
+
+      component.upload();
+    });
+
+    it('should handle upload error', () => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      jest.spyOn(imagemService, 'upload').mockReturnValue(
+        throwError(() => new Error('Upload failed'))
+      );
+
+      component.file = mockFile;
+      component.individuoId = 1;
+
+      component.upload();
+
+      expect(component.uploading).toBe(false);
+      expect(toastrService.error).toHaveBeenCalledWith('Falha no upload');
+    });
+
+    it('should set uploading to true during upload', () => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      component.file = mockFile;
+      component.individuoId = 1;
+
+      component.upload();
+
+      expect(component.uploading).toBe(false);
+    });
+
+    it('should not upload when file is not selected', () => {
+      component.file = undefined;
+      component.individuoId = 1;
+
+      component.upload();
+
+      expect(imagemService.upload).not.toHaveBeenCalled();
+    });
+
+    it('should not upload when individuoId is 0', () => {
+      const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+      component.file = mockFile;
+      component.individuoId = 0;
+
+      component.upload();
+
+      expect(imagemService.upload).not.toHaveBeenCalled();
+    });
   });
 });

@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { LevantamentosModule } from '../levantamentos.module';
 import { CriarLevantamentoComponent } from './criar-levantamento.component';
@@ -65,6 +65,7 @@ const modalStub = {
 describe('CriarLevantamentoComponent', () => {
   let component: CriarLevantamentoComponent;
   let fixture: ComponentFixture<CriarLevantamentoComponent>;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -84,10 +85,95 @@ describe('CriarLevantamentoComponent', () => {
     
     fixture = TestBed.createComponent(CriarLevantamentoComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('submit', () => {
+    it('should return early if form is invalid', () => {
+      component.form.markAllAsTouched();
+      const createSpy = jest.spyOn(levantamentoServiceStub, 'criar');
+      
+      component.submit();
+      
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call levantamentoService.criar with correct parameters when form is valid', () => {
+      const formData = {
+        nome: 'Levantamento Teste',
+        bioma: 'Cerrado',
+        descricao: 'Teste',
+        cidade: 'Brasília',
+        estado: 'DF',
+        pais: 'Brasil'
+      };
+      component.form.patchValue(formData);
+      const createSpy = jest.spyOn(levantamentoServiceStub, 'criar');
+      
+      component.submit();
+      
+      expect(createSpy).toHaveBeenCalledWith(4, formData);
+    });
+
+    it('should set saving to true before calling service', () => {
+      component.form.patchValue({
+        nome: 'Levantamento Teste',
+        bioma: 'Cerrado',
+        descricao: 'Teste',
+        cidade: 'Brasília',
+        estado: 'DF',
+        pais: 'Brasil'
+      });
+      expect(component.saving).toBe(false);
+      
+      component.submit();
+      
+      expect(component.saving).toBe(true);
+    });
+
+    it('should show success toast and navigate on successful creation', fakeAsync(() => {
+      const formData = {
+        nome: 'Levantamento Teste',
+        bioma: 'Cerrado',
+        descricao: 'Teste',
+        cidade: 'Brasília',
+        estado: 'DF',
+        pais: 'Brasil'
+      };
+      component.form.patchValue(formData);
+      const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+      const toastrSuccessSpy = jest.spyOn(toastrServiceStub, 'success');
+      
+      component.submit();
+      tick();
+      
+      expect(toastrSuccessSpy).toHaveBeenCalledWith('Levantamento criado');
+      expect(navigateSpy).toHaveBeenCalledWith(['/levantamentos']);
+    }));
+
+    it('should show error toast and set saving to false on service error', fakeAsync(() => {
+      const formData = {
+        nome: 'Levantamento Teste',
+        bioma: 'Cerrado',
+        descricao: 'Teste',
+        cidade: 'Brasília',
+        estado: 'DF',
+        pais: 'Brasil'
+      };
+      component.form.patchValue(formData);
+      jest.spyOn(levantamentoServiceStub, 'criar').mockReturnValue(throwError(() => new Error('Service error')));
+      const toastrErrorSpy = jest.spyOn(toastrServiceStub, 'error');
+      
+      component.submit();
+      tick();
+      
+      expect(toastrErrorSpy).toHaveBeenCalledWith('Não foi possível criar o levantamento');
+      expect(component.saving).toBe(false);
+    }));
   });
 });

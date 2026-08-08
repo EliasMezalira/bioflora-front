@@ -90,4 +90,20 @@ describe('ListarLevantamentosComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should navigate to edit route when edit is called', () => {
+    const navigateSpy = jest.spyOn(component.router, 'navigate');
+
+    component.edit(42);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/levantamentos/editar', 42]);
+  });
+
+  it('should navigate to detail route when detail is called', () => {
+    const navigateSpy = jest.spyOn(component.router, 'navigate');
+
+    component.detail(7);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/levantamentos', 7]);
+  });
 });

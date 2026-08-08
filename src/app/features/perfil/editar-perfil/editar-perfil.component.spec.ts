@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormBuilder } from '@angular/forms';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { PerfilModule } from '../perfil.module';
 import { EditarPerfilComponent } from './editar-perfil.component';
@@ -66,6 +67,13 @@ describe('EditarPerfilComponent', () => {
   let component: EditarPerfilComponent;
   let fixture: ComponentFixture<EditarPerfilComponent>;
 
+  const createComponent = (currentUser: any = null) => {
+    authServiceStub.getCurrentUser.mockReturnValue(of(currentUser));
+    fixture = TestBed.createComponent(EditarPerfilComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PerfilModule],
@@ -81,13 +89,76 @@ describe('EditarPerfilComponent', () => {
       ]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(EditarPerfilComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    createComponent();
     expect(component).toBeTruthy();
+  });
+
+  it('should load the current user into the form when available', () => {
+    createComponent({ id: 1, nome: 'Maria', email: 'maria@teste.com' });
+
+    expect(component.user).toEqual({ id: 1, nome: 'Maria', email: 'maria@teste.com' });
+    expect(component.form.value).toEqual({
+      nome: 'Maria',
+      email: 'maria@teste.com',
+      senha: ''
+    });
+  });
+
+  it('should not save when there is no current user', () => {
+    createComponent();
+
+    component.save();
+
+    expect(usuarioServiceStub.atualizarUsuario).not.toHaveBeenCalled();
+    expect(component.saving).toBe(false);
+  });
+
+  it('should not save when the form is invalid', () => {
+    createComponent({ id: 1, nome: 'Maria', email: 'maria@teste.com' });
+
+    component.form.patchValue({ email: 'invalid-email' });
+    component.save();
+
+    expect(usuarioServiceStub.atualizarUsuario).not.toHaveBeenCalled();
+    expect(component.saving).toBe(false);
+  });
+
+  it('should save the profile successfully', () => {
+    createComponent({ id: 1, nome: 'Maria', email: 'maria@teste.com' });
+    const updatedUser = { id: 1, nome: 'Maria Silva', email: 'maria.silva@teste.com' };
+    usuarioServiceStub.atualizarUsuario.mockReturnValueOnce(of(updatedUser));
+
+    component.form.patchValue({
+      nome: 'Maria Silva',
+      email: 'maria.silva@teste.com',
+      senha: ''
+    });
+    component.save();
+
+    expect(usuarioServiceStub.atualizarUsuario).toHaveBeenCalledWith(1, {
+      nome: 'Maria Silva',
+      email: 'maria.silva@teste.com',
+      senha: undefined
+    });
+    expect(toastrServiceStub.success).toHaveBeenCalledWith('Perfil atualizado com sucesso');
+    expect(authServiceStub.setCurrentUser).toHaveBeenCalledWith(updatedUser);
+    expect(component.saving).toBe(false);
+  });
+
+  it('should show an error when saving fails', () => {
+    createComponent({ id: 1, nome: 'Maria', email: 'maria@teste.com' });
+    usuarioServiceStub.atualizarUsuario.mockReturnValueOnce(throwError(() => new Error('fail')));
+
+    component.form.patchValue({
+      nome: 'Maria Silva',
+      email: 'maria.silva@teste.com'
+    });
+    component.save();
+
+    expect(toastrServiceStub.error).toHaveBeenCalledWith('Erro ao atualizar perfil');
+    expect(component.saving).toBe(false);
   });
 });

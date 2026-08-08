@@ -89,4 +89,13 @@ describe('PaginationComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should emit pageChange when goTo receives a valid page', () => {
+    component.totalPages = 5;
+    const emitSpy = jest.spyOn(component.pageChange, 'emit');
+
+    component.goTo(2);
+
+    expect(emitSpy).toHaveBeenCalledWith(2);
+  });
 });

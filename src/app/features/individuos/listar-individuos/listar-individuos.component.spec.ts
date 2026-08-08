@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { ListarIndividuosComponent } from './listar-individuos.component';
@@ -65,6 +65,7 @@ const modalStub = {
 describe('ListarIndividuosComponent', () => {
   let component: ListarIndividuosComponent;
   let fixture: ComponentFixture<ListarIndividuosComponent>;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -84,10 +85,43 @@ describe('ListarIndividuosComponent', () => {
     
     fixture = TestBed.createComponent(ListarIndividuosComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should navigate to create page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.create();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/individuos/criar', 0]);
+  });
+
+  it('should navigate to edit page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.edit(5);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/individuos/editar', 5]);
+  });
+
+  it('should navigate to detail page', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.detail(7);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/individuos', 7]);
+  });
+
+  it('should stop loading when listar fails', () => {
+    jest.spyOn(individuoServiceStub, 'listar').mockReturnValueOnce(throwError(() => new Error('fail')));
+
+    component.loadPage();
+
+    expect(component.loading).toBe(false);
   });
 });
