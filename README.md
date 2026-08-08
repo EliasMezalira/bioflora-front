@@ -4,6 +4,18 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 [![CI - Test](../../actions/workflows/test.yml/badge.svg)](../../actions/workflows/test.yml)
 
+
+## Decisões de Tecnologia e Arquiteturais
+
+* **Angular:** framework utilizado para o desenvolvimento da aplicação frontend, permite modularização e organização do código.
+* **Bootstrap:** utilizado para estilização e construção da interface, proporcionando componentes responsivos e padronização visual.
+* **Jest:** substituiu o Jasmine como framework de testes unitários, visando uma execução mais rápida e uma experiência de testes mais estável.
+* **GitHub Pages:** o frontend é compilado e disponibilizado por meio de um pipeline de CI/CD utilizando GitHub Actions e hospedagem no próprio GitHub.
+
+### Interação Front-Back
+* **API REST:** comunicação entre o frontend e o backend realizada por meio de uma API baseada em REST.
+* **Autenticação JWT:** autenticação dos usuários realizada por meio de JSON Web Tokens (JWT), utilizados para autenticar e autorizar as requisições à API.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
