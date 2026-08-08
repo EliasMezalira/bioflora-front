@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { DetalheIndividuoComponent } from './detalhe-individuo.component';
@@ -13,12 +13,12 @@ import { ToastrService } from 'ngx-toastr';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 const pageResponse = { content: [], page: 0, totalPages: 0 };
-const activatedRouteStub = {
+let activatedRouteStub: {
   snapshot: {
     paramMap: {
-      get: () => '0'
-    }
-  }
+      get: jest.Mock;
+    };
+  };
 };
 const authServiceStub = {
   isAuthenticated: jest.fn(() => false),
@@ -67,10 +67,19 @@ describe('DetalheIndividuoComponent', () => {
   let fixture: ComponentFixture<DetalheIndividuoComponent>;
 
   beforeEach(async () => {
+    activatedRouteStub = {
+      snapshot: {
+        paramMap: {
+          get: jest.fn(() => '0')
+        }
+      }
+    };
+
     await TestBed.configureTestingModule({
       imports: [IndividuosModule],
       providers: [
         provideRouter([]),
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: AuthService, useValue: authServiceStub },
         { provide: IndividuoService, useValue: individuoServiceStub },
         { provide: ImagemService, useValue: imagemServiceStub },
@@ -89,5 +98,32 @@ describe('DetalheIndividuoComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('deve buscar o indivíduo quando há um id válido', () => {
+    const individuoService = TestBed.inject(IndividuoService) as unknown as typeof individuoServiceStub;
+    const individuo = { id: 1, nome: 'Teste' } as any;
+
+    activatedRouteStub.snapshot.paramMap.get.mockReturnValue('1');
+    individuoService.obter.mockReturnValue(of(individuo));
+
+    component.ngOnInit();
+
+    expect(individuoService.obter).toHaveBeenCalledWith(1);
+    expect(component.id).toBe(1);
+    expect(component.loading).toBeFalsy();
+    expect(component.individuo).toEqual(individuo);
+  });
+
+  it('deve encerrar o loading quando a busca falhar', () => {
+    const individuoService = TestBed.inject(IndividuoService) as unknown as typeof individuoServiceStub;
+
+    activatedRouteStub.snapshot.paramMap.get.mockReturnValue('2');
+    individuoService.obter.mockReturnValue(throwError(() => new Error('Erro')));
+
+    component.ngOnInit();
+
+    expect(individuoService.obter).toHaveBeenCalledWith(2);
+    expect(component.loading).toBeFalsy();
   });
 });

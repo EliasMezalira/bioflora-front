@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { CriarIndividuoComponent } from './criar-individuo.component';
@@ -67,6 +67,8 @@ describe('CriarIndividuoComponent', () => {
   let fixture: ComponentFixture<CriarIndividuoComponent>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [IndividuosModule],
       providers: [
@@ -89,5 +91,72 @@ describe('CriarIndividuoComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should not submit when the form is invalid', () => {
+    component.form.reset();
+    component.levantamentoId = 7;
+
+    component.submit();
+
+    expect(individuoServiceStub.criar).not.toHaveBeenCalled();
+    expect(component.loading).toBe(false);
+  });
+
+  it('should not submit when the levantamento id is missing', () => {
+    component.form.patchValue({
+      parcela: 'P1',
+      vivoMorto: 'vivo',
+      dataLevantamento: '2024-01-01'
+    });
+    component.levantamentoId = 0;
+
+    component.submit();
+
+    expect(individuoServiceStub.criar).not.toHaveBeenCalled();
+    expect(component.loading).toBe(false);
+  });
+
+  it('should submit the payload without diametroCaule and navigate on success', () => {
+    const createSpy = individuoServiceStub.criar as jest.Mock;
+    const routerStub = TestBed.inject(Router)
+    const routerNavigateSpy = jest.spyOn(routerStub, 'navigate');
+
+    component.levantamentoId = 7;
+    component.form.patchValue({
+      parcela: 'P1',
+      nomePopular: 'Nome popular',
+      nomeCientifico: 'Nome científico',
+      diametroCaule: '',
+      vivoMorto: 'vivo',
+      dataLevantamento: '2024-01-01'
+    });
+
+    component.submit();
+
+    expect(createSpy).toHaveBeenCalledWith(7, {
+      parcela: 'P1',
+      nomePopular: 'Nome popular',
+      nomeCientifico: 'Nome científico',
+      vivoMorto: 'vivo',
+      dataLevantamento: '2024-01-01'
+    });
+    expect(toastrServiceStub.success).toHaveBeenCalledWith('Indivíduo criado');
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/individuos']);
+  });
+
+  it('should reset loading and show an error toast when creation fails', () => {
+    component.levantamentoId = 7;
+    component.form.patchValue({
+      parcela: 'P1',
+      vivoMorto: 'vivo',
+      dataLevantamento: '2024-01-01'
+    });
+    (individuoServiceStub.criar as jest.Mock).mockReturnValueOnce(throwError(() => new Error('fail')));
+
+    component.submit();
+
+    expect(component.loading).toBe(false);
+    expect(toastrServiceStub.error).toHaveBeenCalledWith('Erro ao criar indivíduo');
   });
 });

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { IndividuosModule } from '../individuos.module';
 import { AnaliseIaComponent } from './analise-ia.component';
@@ -85,9 +85,49 @@ describe('AnaliseIaComponent', () => {
     fixture = TestBed.createComponent(AnaliseIaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    jest.clearAllMocks();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should not call the service when individuoId is missing', () => {
+    component.individuoId = 0;
+
+    component.analyze();
+
+    expect(individuoServiceStub.completarComIA).not.toHaveBeenCalled();
+    expect(component.loading).toBe(false);
+    expect(component.error).toBe(false);
+  });
+
+  it('should call the service and set the result on success', () => {
+    const result = { id: 7, nomeCientifico: 'Species test' } as any;
+    const subject = new Subject<any>();
+    individuoServiceStub.completarComIA.mockReturnValue(subject.asObservable());
+
+    component.individuoId = 7;
+    component.analyze();
+
+    expect(component.loading).toBe(true);
+    expect(component.error).toBe(false);
+    expect(individuoServiceStub.completarComIA).toHaveBeenCalledWith(7);
+
+    subject.next(result);
+
+    expect(component.result).toEqual(result);
+    expect(component.loading).toBe(false);
+  });
+
+  it('should handle service errors by setting the error flag', () => {
+    individuoServiceStub.completarComIA.mockReturnValue(throwError(() => new Error('Erro')));
+
+    component.individuoId = 8;
+    component.analyze();
+
+    expect(individuoServiceStub.completarComIA).toHaveBeenCalledWith(8);
+    expect(component.loading).toBe(false);
+    expect(component.error).toBe(true);
   });
 });
