@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { AuthModule } from '../auth.module';
 import { RegisterComponent } from './register.component';
@@ -65,8 +65,11 @@ const modalStub = {
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
+  let router: Router;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [AuthModule],
       providers: [
@@ -84,10 +87,66 @@ describe('RegisterComponent', () => {
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should warn and stop when form is invalid or passwords do not match', () => {
+    component.form.patchValue({
+      nome: 'Teste',
+      email: 'teste@teste.com',
+      senha: '123456',
+      confirmSenha: '1234567'
+    });
+
+    component.submit();
+
+    expect(toastrServiceStub.warning).toHaveBeenCalledWith('Preencha os campos corretamente e confirme a senha');
+    expect(authServiceStub.register).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(component.loading).toBe(false);
+  });
+
+  it('should register and redirect on success', () => {
+    authServiceStub.register.mockReturnValueOnce(of({ id: 1 }));
+    component.form.patchValue({
+      nome: 'Teste',
+      email: 'teste@teste.com',
+      senha: '123456',
+      confirmSenha: '123456'
+    });
+
+    component.submit();
+
+    expect(authServiceStub.register).toHaveBeenCalledWith({
+      nome: 'Teste',
+      email: 'teste@teste.com',
+      senha: '123456'
+    });
+    expect(toastrServiceStub.success).toHaveBeenCalledWith('Cadastro realizado com sucesso');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+    expect(component.loading).toBe(false);
+  });
+
+  it('should show an error toast when registration fails', () => {
+    authServiceStub.register.mockReturnValueOnce(throwError(() => new Error('fail')));
+    component.form.patchValue({
+      nome: 'Teste',
+      email: 'teste@teste.com',
+      senha: '123456',
+      confirmSenha: '123456'
+    });
+
+    component.submit();
+
+    expect(authServiceStub.register).toHaveBeenCalled();
+    expect(toastrServiceStub.error).toHaveBeenCalledWith('Não foi possível registrar o usuário');
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(component.loading).toBe(false);
   });
 });

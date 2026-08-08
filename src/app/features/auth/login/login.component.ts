@@ -44,11 +44,7 @@ export class LoginComponent implements OnInit {
         this.router.navigateByUrl('/dashboard');
       },
       error: () => {
-        try {
-          this.toastr.error('Falha no login. Verifique suas credenciais.');
-        } catch {
-          alert('Falha no login. Verifique suas credenciais.');
-        }
+        this.toastr.error('Falha no login. Verifique suas credenciais.');
       }
     });
   }

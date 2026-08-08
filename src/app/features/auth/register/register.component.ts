@@ -47,11 +47,7 @@ export class RegisterComponent implements OnInit {
         this.router.navigateByUrl('/auth/login');
       },
       error: () => {
-        try {
-          this.toastr.error('Não foi possível registrar o usuário');
-        } catch {
-          alert('Não foi possível registrar o usuário');
-        }
+        this.toastr.error('Não foi possível registrar o usuário');
       }
     });
   }

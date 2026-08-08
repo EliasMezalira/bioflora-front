@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { AuthModule } from '../auth.module';
 import { LoginComponent } from './login.component';
@@ -65,8 +65,11 @@ const modalStub = {
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
+  let router: Router;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [AuthModule],
       providers: [
@@ -84,10 +87,52 @@ describe('LoginComponent', () => {
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should not submit when form is invalid', () => {
+    const loginSpy = authServiceStub.login as jest.Mock;
+
+    component.form.reset();
+    component.submit();
+
+    expect(loginSpy).not.toHaveBeenCalled();
+    expect(toastrServiceStub.success).not.toHaveBeenCalled();
+    expect(toastrServiceStub.error).not.toHaveBeenCalled();
+  });
+
+  it('should login and navigate to dashboard on success', () => {
+    const navigateByUrlSpy = jest.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    const loginSpy = authServiceStub.login as jest.Mock;
+
+    loginSpy.mockReturnValue(of({ id: 1, nome: 'Usuário', email: 'teste@teste.com' }));
+    component.form.setValue({ email: 'teste@teste.com', senha: '123456' });
+
+    component.submit();
+
+    expect(loginSpy).toHaveBeenCalledWith('teste@teste.com', '123456');
+    expect(toastrServiceStub.success).toHaveBeenCalledWith('Login realizado com sucesso');
+    expect(navigateByUrlSpy).toHaveBeenCalledWith('/dashboard');
+    expect(toastrServiceStub.error).not.toHaveBeenCalled();
+  });
+
+  it('should show an error message when login fails', () => {
+    const navigateByUrlSpy = jest.spyOn(router, 'navigateByUrl');
+    const loginSpy = authServiceStub.login as jest.Mock;
+
+    loginSpy.mockReturnValue(throwError(() => new Error('Unauthorized')));
+    component.form.setValue({ email: 'teste@teste.com', senha: '123456' });
+
+    component.submit();
+
+    expect(loginSpy).toHaveBeenCalledWith('teste@teste.com', '123456');
+    expect(toastrServiceStub.error).toHaveBeenCalledWith('Falha no login. Verifique suas credenciais.');
+    expect(navigateByUrlSpy).not.toHaveBeenCalled();
+    expect(toastrServiceStub.success).not.toHaveBeenCalled();
   });
 });
