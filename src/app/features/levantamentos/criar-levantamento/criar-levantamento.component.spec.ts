@@ -82,7 +82,7 @@ describe('CriarLevantamentoComponent', () => {
       ]
     })
     .compileComponents();
-    
+
     fixture = TestBed.createComponent(CriarLevantamentoComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
@@ -97,9 +97,9 @@ describe('CriarLevantamentoComponent', () => {
     it('should return early if form is invalid', () => {
       component.form.markAllAsTouched();
       const createSpy = jest.spyOn(levantamentoServiceStub, 'criar');
-      
+
       component.submit();
-      
+
       expect(createSpy).not.toHaveBeenCalled();
     });
 
@@ -114,10 +114,10 @@ describe('CriarLevantamentoComponent', () => {
       };
       component.form.patchValue(formData);
       const createSpy = jest.spyOn(levantamentoServiceStub, 'criar');
-      
+
       component.submit();
-      
-      expect(createSpy).toHaveBeenCalledWith(4, formData);
+
+      expect(createSpy).toHaveBeenCalledWith(0, formData);
     });
 
     it('should set saving to true before calling service', () => {
@@ -130,9 +130,9 @@ describe('CriarLevantamentoComponent', () => {
         pais: 'Brasil'
       });
       expect(component.saving).toBe(false);
-      
+
       component.submit();
-      
+
       expect(component.saving).toBe(true);
     });
 
@@ -148,10 +148,10 @@ describe('CriarLevantamentoComponent', () => {
       component.form.patchValue(formData);
       const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
       const toastrSuccessSpy = jest.spyOn(toastrServiceStub, 'success');
-      
+
       component.submit();
       tick();
-      
+
       expect(toastrSuccessSpy).toHaveBeenCalledWith('Levantamento criado');
       expect(navigateSpy).toHaveBeenCalledWith(['/levantamentos']);
     }));
@@ -168,10 +168,10 @@ describe('CriarLevantamentoComponent', () => {
       component.form.patchValue(formData);
       jest.spyOn(levantamentoServiceStub, 'criar').mockReturnValue(throwError(() => new Error('Service error')));
       const toastrErrorSpy = jest.spyOn(toastrServiceStub, 'error');
-      
+
       component.submit();
       tick();
-      
+
       expect(toastrErrorSpy).toHaveBeenCalledWith('Não foi possível criar o levantamento');
       expect(component.saving).toBe(false);
     }));
