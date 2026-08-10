@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { LevantamentoService } from '../../../core/services/levantamento.service';
 import { ToastrService } from 'ngx-toastr';
@@ -12,15 +13,20 @@ import { ToastrService } from 'ngx-toastr';
 export class CriarLevantamentoComponent implements OnInit {
   form!: FormGroup;
   saving = false;
+  private usuarioId?: number;
 
   constructor(
     private fb: FormBuilder,
     private levantamentoService: LevantamentoService,
     private router: Router,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.authService.getCurrentUser().subscribe(user => {
+      this.usuarioId = user?.id;
+    });
     this.form = this.fb.group({
       nome: ['', Validators.required],
       bioma: ['', Validators.required],
@@ -36,8 +42,7 @@ export class CriarLevantamentoComponent implements OnInit {
       return;
     }
     this.saving = true;
-    const usuarioId = 4;
-    this.levantamentoService.criar(usuarioId, this.form.value).subscribe({
+    this.levantamentoService.criar(this.usuarioId ? this.usuarioId : 0 , this.form.value).subscribe({
       next: () => {
         this.toastr.success('Levantamento criado');
         this.router.navigate(['/levantamentos']);
